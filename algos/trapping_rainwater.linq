@@ -20,8 +20,9 @@ void Main()
 
 	int resultQuadratic = TrappingRainwaterQuadratic(heights);
 	int resultLinear    = TrappingRainwaterLinear(heights);
+	int resultPrecomputed = TrappingRainwaterPrecomputed(heights);
 
-	new { SubOptimal_O_N2 = resultQuadratic, Optimal_O_N = resultLinear }
+	new { SubOptimal_O_N2 = resultQuadratic, Optimal_O_N = resultLinear, Precomputed_O_N = resultPrecomputed }
 		.Dump("Water Trapped (both methods should agree)");
 
 	// Show per-bar breakdown using the O(N) precomputed arrays approach for illustration
@@ -101,6 +102,42 @@ int TrappingRainwaterLinear(int[] h)
 			right--;
 		}
 	}
+
+	return total;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PRECOMPUTED  O(N) time, O(N) space — prefix/suffix maxima
+// ─────────────────────────────────────────────────────────────────────────────
+// 1. Build maxLeft[i]  = max height in h[0..i]   (left-to-right prefix scan)
+// 2. Build maxRight[i] = max height in h[i..n-1]  (right-to-left suffix scan)
+// 3. Water at bar i    = max(0, min(maxLeft[i], maxRight[i]) - h[i])
+//
+// The water above each bar is capped by the shorter of the tallest walls on
+// either side.  Precomputing both scans separately makes this O(N) time at the
+// cost of two extra O(N) arrays, which is the trade-off vs the two-pointer
+// approach that achieves O(1) space.
+int TrappingRainwaterPrecomputed(int[] h)
+{
+	int n = h.Length;
+
+	// Pass 1 (left → right): maxLeft[i] = tallest bar from index 0 up to i
+	int[] maxLeft = new int[n];
+	maxLeft[0] = h[0];
+	for (int i = 1; i < n; i++)
+		maxLeft[i] = Math.Max(maxLeft[i - 1], h[i]);
+
+	// Pass 2 (right → left): maxRight[i] = tallest bar from index i up to n-1
+	int[] maxRight = new int[n];
+	maxRight[n - 1] = h[n - 1];
+	for (int i = n - 2; i >= 0; i--)
+		maxRight[i] = Math.Max(maxRight[i + 1], h[i]);
+
+	// Pass 3: for each bar, the effective water level is min(maxLeft, maxRight);
+	// subtract the bar's own height and clamp to zero.
+	int total = 0;
+	for (int i = 0; i < n; i++)
+		total += Math.Max(0, Math.Min(maxLeft[i], maxRight[i]) - h[i]);
 
 	return total;
 }
