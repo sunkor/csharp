@@ -30,12 +30,12 @@ public class GridShortestPath
 			}
 		}
 
-		int[][] dirs =
+		int[,] dirs =
 		{
-			new[] { 1, 0 },   // down
-            new[] { -1, 0 },  // up
-            new[] { 0, 1 },   // right
-            new[] { 0, -1 }   // left
+			{  1,  0 },   // down
+			{ -1,  0 },   // up
+			{  0,  1 },   // right
+			{  0, -1 }    // left
         };
 
 		while (queue.Count > 0)
@@ -45,10 +45,10 @@ public class GridShortestPath
 			if (grid[r, c] == 'B')
 				return dist;
 
-			foreach (var d in dirs)
+			for (int i = 0; i < dirs.GetLength(0); i++)
 			{
-				int nr = r + d[0];
-				int nc = c + d[1];
+				int nr = r + dirs[i, 0];
+				int nc = c + dirs[i, 1];
 
 				if (nr < 0 || nr >= rows || nc < 0 || nc >= cols)
 					continue;
