@@ -1,7 +1,9 @@
 <Query Kind="Statements" />
 
 
-int [] numbers = [2,-1,0,3,1,4,2,3];
+
+//int [] numbers = [2,-1,0,3,1,4,2,3];
+int [] numbers = [1, 3, 1, 2, 0, 5 ];
 var k = 3;
 
 MaximumSlidingWindow(numbers,k).Dump();
@@ -27,7 +29,7 @@ int[] MaximumSlidingWindow(int [] numbers, int k)
 			mq.Push(numbers[i]);
 			int maxValue = mq.Max();
 			results.Add(maxValue);
-			mq.PopMaximumValue(maxValue);
+			mq.Pop(numbers[i - k + 1]);
 		}
 	}
 	
@@ -58,9 +60,9 @@ class MonotonicQueue
 		return dequeue.First.Value;
 	}
 	
-	public void PopMaximumValue(int val)
+	public void Pop(int val)
 	{
-		while (dequeue.Count > 0 && dequeue.Last.Value == val)
+		while (dequeue.Count > 0 && dequeue.First.Value == val)
 		{
 			dequeue.RemoveFirst();
 		}
