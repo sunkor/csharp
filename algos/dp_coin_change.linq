@@ -1,6 +1,6 @@
 <Query Kind="Program" />
 
-// DP Coin Change Problem abc
+// DP Coin Change Problem
 // Given a set of coin denominations and a target amount,
 // find the MINIMUM number of coins needed to make that amount.
 // If it's not possible, return -1.
