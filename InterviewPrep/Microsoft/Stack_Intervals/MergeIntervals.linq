@@ -39,7 +39,30 @@ void Main()
 // ---- Implement this method ----
 int[][] MergeIntervals(int[][] intervals)
 {
-	throw new NotImplementedException("Implement me!");
+	if(intervals == null || intervals.Length <= 1)
+		return intervals;
+		
+	var mergedInterval = new List<int[]>();
+	
+	Array.Sort(intervals, (a,b) => a[0].CompareTo(b[0]));
+	
+	int [] current = intervals[0];
+	mergedInterval.Add(current);
+	
+	foreach(var next in intervals)
+	{
+		if(next[0] <= current[1])
+		{
+			current[1] = Math.Max(next[1], current[1]);
+		}
+		else
+		{
+			current = next;
+			mergedInterval.Add(current);
+		}
+	}
+		
+	return mergedInterval.ToArray();
 }
 
 // ---- Test harness ----
