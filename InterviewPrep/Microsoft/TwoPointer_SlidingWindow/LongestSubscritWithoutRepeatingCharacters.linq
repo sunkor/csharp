@@ -27,10 +27,31 @@ void Main()
 	RunTests();
 }
 
-// TODO: implement this
 static int LengthOfLongestSubstring(string s)
 {
-	throw new NotImplementedException();
+	if(s == null || s.Length == 0)
+	{
+		return 0;
+	}
+
+	var slidingWindow = new Dictionary<char,int>();
+	int max = 0, start = 0;
+	
+	for(int i = 0; i < s.Length; i++)
+	{
+		var ch = s[i];
+		
+		if(slidingWindow.TryGetValue(ch, out var prev) && prev >= start)
+		{
+			start = prev + 1;
+		}
+		
+		slidingWindow[ch] = i;
+		
+		max = Math.Max(max, i - start + 1);
+	}
+	
+	return max;
 }
 
 public class LongestSubstringTests
