@@ -1,8 +1,12 @@
-<Query Kind="Program" />
+<Query Kind="Program">
+  <Namespace>System.Runtime.InteropServices</Namespace>
+</Query>
 
 void Main()
 {
 	/*
+	 * Sort vs count. Counting is asymptotically better, but for short words k log k is tiny, and the sort key is often just as fast in practice because the 26-element key has its own hashing and allocation cost. Interviewers like hearing that nuance.
+	 *
 	 * PROBLEM: Group Anagrams
 	 * ------------------------
 	 * Given an array of strings `strs`, group the anagrams together.
@@ -87,13 +91,19 @@ void Main()
 			[["ab", "ba"], ["abc"], ["xyz", "zyx"], ["a"]]),
 	};
 
-	var results = testCases.Select(tc =>
+	var implementations = new (string Name, Func<string[], List<List<string>>> Method)[]
+	{
+		//("GroupAnagramsBySort", GroupAnagramsBySort),
+		("GroupAnagramsByCount", GroupAnagramsByCount),
+	};
+
+	var results = implementations.SelectMany(impl => testCases.Select(tc =>
 	{
 		string error = null;
 		List<List<string>> actual = null;
 		try
 		{
-			actual = GroupAnagrams(tc.Input).Select(g => g.ToList()).ToList();
+			actual = impl.Method(tc.Input).Select(g => g.ToList()).ToList();
 		}
 		catch (NotImplementedException)
 		{
@@ -108,6 +118,7 @@ void Main()
 
 		return new
 		{
+			Implementation = impl.Name,
 			tc.Name,
 			Input = string.Join(", ", tc.Input.Select(s => $"\"{s}\"")),
 			Passed = passed,
@@ -115,7 +126,7 @@ void Main()
 			Actual = actual == null ? "" : string.Join(" | ", actual.Select(g => "[" + string.Join(",", g) + "]")),
 			Expected = string.Join(" | ", tc.Expected.Select(g => "[" + string.Join(",", g) + "]")),
 		};
-	}).ToList();
+	})).ToList();
 
 	results.Dump("Test Results");
 
@@ -126,9 +137,73 @@ void Main()
 // -----------------------------------------------------------------
 // Implement this method.
 // -----------------------------------------------------------------
-List<List<string>> GroupAnagrams(string[] strs)
+List<List<string>> GroupAnagramsBySort(string[] strs)
 {
-	throw new NotImplementedException();
+	if(strs == null)
+	{
+		return null;
+	}
+	
+	var dict = new Dictionary<string,List<string>>();
+	
+	foreach(var str in strs)
+	{
+		if (str is null)
+			continue;
+			
+		var charArray = str.ToCharArray();
+		Array.Sort(charArray);
+		var key = new string(charArray);
+		
+		ref var groupedList = ref CollectionsMarshal.GetValueRefOrAddDefault(dict, key, out var exists);
+		
+		if(!exists)
+		{
+			groupedList = new List<string>();
+		}
+		
+		groupedList.Add(str);
+	}
+
+	return dict.Values.ToList();
+}
+
+List<List<string>> GroupAnagramsByCount(string[] strs)
+{
+	if (strs == null)
+	{
+		return null;
+	}
+
+	var dict = new Dictionary<string, List<string>>();
+
+	Span<char> charArray = stackalloc char[26];
+
+	foreach (var str in strs)
+	{
+		if(str is null)
+			continue;
+		
+		charArray.Clear();
+		
+		foreach(var ch in str)
+		{
+			charArray[ch - 'a']++;
+		}
+		
+		var key = new string(charArray);
+
+		ref var groupedList = ref CollectionsMarshal.GetValueRefOrAddDefault(dict, key, out var exists);
+
+		if (!exists)
+		{
+			groupedList = new List<string>();
+		}
+
+		groupedList.Add(str);
+	}
+
+	return dict.Values.ToList();
 }
 
 // -----------------------------------------------------------------
